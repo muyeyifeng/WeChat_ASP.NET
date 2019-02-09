@@ -256,6 +256,7 @@ public class WXResponse
                             content = "欢迎订阅！公众号还在开发中哦！\n目前只是一个优秀的复读机~\no(∩_∩)o";
                             re_msgType = "text";
                         }
+                        //以下为数据库操作部分，将用户名保存在数据库中，不是必要的。
                         string connstring = ConfigurationManager.AppSettings["connstring"].ToString();
                         SqlConnection sqlConnection = new SqlConnection(connstring);
                         sqlConnection.Open();
@@ -363,7 +364,7 @@ public class Cryptography
     /// <param name="Input">密文</param>
     /// <param name="EncodingAESKey"></param>
     /// <returns></returns>
-    /// 
+    ///
     public static string AES_decrypt(String Input, string EncodingAESKey, ref string appid)
     {
         byte[] Key;
@@ -513,7 +514,7 @@ public class Cryptography
     }
     /**
      * 将数字转化成ASCII码对应的字符，用于对明文进行补码
-     * 
+     *
      * @param a 需要转化的数字
      * @return 转化得到的字符
      */
