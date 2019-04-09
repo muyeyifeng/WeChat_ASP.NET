@@ -249,20 +249,31 @@ public class WXResponse
 
                     string _event = xmlNodeList[0].ChildNodes[4].InnerText;
                     string eventKey = xmlNodeList[0].ChildNodes[5].InnerText;
-                    if (_event.Equals("subscribe") || _event.Equals("subscribe"))   //订阅状态变更
+                    if (_event.Equals("subscribe") || _event.Equals("unsubscribe"))   //订阅状态变更
                     {
+                        string connstring = ConfigurationManager.AppSettings["connstring"].ToString();
+                        SqlConnection sqlConnection = new SqlConnection(connstring);
+                        sqlConnection.Open();
+                        SqlCommand sqlCommand = null;
                         if (_event.Equals("subscribe"))
                         {
                             content = "欢迎订阅！公众号还在开发中哦！\n目前只是一个优秀的复读机~\no(∩_∩)o";
                             re_msgType = "text";
+                            sqlCommand = new SqlCommand("select * from WX where SubUserName='" + fromUserName + "';", sqlConnection);
+                            SqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
+                            if (!sqlDataReader.Read())
+                            {
+                                sqlConnection.Close();
+                                sqlConnection.Open();
+                                string cmd = "INSERT INTO WX (SubUserName,Status,Power) VALUES ('" + fromUserName + "','" + _event + "','" + 0 + "');";
+                                sqlCommand = new SqlCommand(cmd, sqlConnection);
+                                sqlCommand.ExecuteReader();
+                            }
                         }
-                        //以下为数据库操作部分，将用户名保存在数据库中，不是必要的。
-                        string connstring = ConfigurationManager.AppSettings["connstring"].ToString();
-                        SqlConnection sqlConnection = new SqlConnection(connstring);
+                        sqlConnection.Close();
                         sqlConnection.Open();
-                        SqlCommand sqlCommand = new SqlCommand("update WX set Status ='" + _event + "' where SubUserName ='" + fromUserName + "'", sqlConnection);
-                        SqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
-                        sqlDataReader.Close();
+                        sqlCommand = new SqlCommand("update WX set Status ='" + _event + "' where SubUserName ='" + fromUserName + "'", sqlConnection);
+                        sqlCommand.ExecuteReader();
                         sqlConnection.Close();
                     }
                     break;
@@ -364,7 +375,7 @@ public class Cryptography
     /// <param name="Input">密文</param>
     /// <param name="EncodingAESKey"></param>
     /// <returns></returns>
-    ///
+    /// 
     public static string AES_decrypt(String Input, string EncodingAESKey, ref string appid)
     {
         byte[] Key;
@@ -512,12 +523,12 @@ public class Cryptography
         }
         return Encoding.UTF8.GetBytes(tmp);
     }
-    /**
-     * 将数字转化成ASCII码对应的字符，用于对明文进行补码
-     *
-     * @param a 需要转化的数字
-     * @return 转化得到的字符
-     */
+    ///
+    ///* 将数字转化成ASCII码对应的字符，用于对明文进行补码
+    ///* 
+    ///* @param a 需要转化的数字
+    ///* @return 转化得到的字符
+    ///
     static char chr(int a)
     {
 
